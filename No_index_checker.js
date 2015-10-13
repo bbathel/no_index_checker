@@ -66,7 +66,7 @@ function No_index_checker(){
     var disallow_regex= /disallow\: {0,2}([\w\\\/]*)/i;                                      // this catches the directory disallowed by the disallow statement
     var path_regex = new RegExp(window.location.pathname.substring(1,window.location.pathname.length));
     var meta_tag_regex = new RegExp('robots','gi');                                          // regex to find if robots is the name of the meta tag
-    var no_regex = /no\-(index|follow)/;                                                     // regex to find if no-index or no-follow is the content of the meta tag  
+    var no_regex = /no\-?(index|follow)/;                                                     // regex to find if no-index or no-follow is the content of the meta tag  
     
     /* function takes the robots.txt and is going to take the robots.txt as a string test it against a regex to see if you current page is disallowed */
     this.robots_alert = function(robots){
