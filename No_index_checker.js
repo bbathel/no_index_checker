@@ -61,24 +61,29 @@ function No_index_checker(){
  
     var robots, disallow_string, ahhhh_no_robots, meta_tags;                                 //variables to be used later.
     this.url = window.location.protocol + "//" + window.location.hostname + "/robots.txt";
-    this.UA_groups = new Object();
+    var UA_groups = new Object();
     var UA_regex = /user-agent\:\s*(.*)/i;                                                   // this catches the user-agent in a user-agent line
-    var disallow_regex= /disallow\: {0,2}([\w\\\/]*)/i;                                      // this catches the directory disallowed by the disallow statement
+    var disallow_regex= /disallow\: {0,2}([\w\\\/\.]*)/i;                                      // this catches the directory disallowed by the disallow statement
     var path_regex = new RegExp(window.location.pathname.substring(1,window.location.pathname.length));
     var meta_tag_regex = new RegExp('robots','gi');                                          // regex to find if robots is the name of the meta tag
-    var no_regex = /no\-?(index|follow)/;                                                     // regex to find if no-index or no-follow is the content of the meta tag  
+    var no_regex = /no\-?(index|follow)/;                                                    // regex to find if no-index or no-follow is the content of the meta tag
     
-    /* function takes the robots.txt and is going to take the robots.txt as a string test it against a regex to see if you current page is disallowed */
-    this.robots_alert = function(robots){
+    
+    /* getters */
+    this.get_uas = function(){return UA_groups};
+    this.get_robots = function(){return robots};
+    
+    /* function takes the robots.txt as only argument, parses it,adds a key to UA_groups obect and seperates it into arrays by user-agent containing all the disallows directives*/
+    var robots_parse = function(robots){
         var user_agent                                                                       // variable to hold the user_agent string gotten from the User-agent: directive 
         robots_array = robots.split(/\n/);                                                   // robots_array is the robots.txt split at every new line
         for(var i = 0; i < robots_array.length;i++){
             if(UA_regex.test(robots_array[i])){                                              // if the line is a user-agent: line
                 user_agent = robots_array[i].match(UA_regex)[1];                             // sets user_agent to the name from the robots.txt
-                this.UA_groups[user_agent] = new Array();                                    // creates a new array within a key value pair of the UA_groups object, where the key is the name of the UA
+                UA_groups[user_agent] = new Array();                                    // creates a new array within a key value pair of the UA_groups object, where the key is the name of the UA
                 }
             else if (disallow_regex.test(robots_array[i]) &&  user_agent !== undefined) {    // if the line is a disallow line and user_agent was already set 
-                this.UA_groups[user_agent].push(robots_array[i].match(disallow_regex)[1])    // add the path after disallow to the array
+                UA_groups[user_agent].push(robots_array[i].match(disallow_regex)[1])    // add the path after disallow to the array
             }
         }
         text_output.log(this.UA_groups);
@@ -97,10 +102,27 @@ function No_index_checker(){
             }
         } return false;
     }
+    
+    /* takes the UA_groups and decides if page is disallowed first for googlebot and if googlebot UA doesn't exist then it checks the "*" user-agent */
+    var disallow_checker = function(UA_groups){
+        if (UA_groups['google-bot'] !== undefined) {
+            text_output.log(UA_groups['google-bot'].contains(window.location.pathname));
+            if (UA_groups['google-bot'].contains(window.location.pathname)) {
+                text_output.log('inside google-bot contains');
+                create_alert_box("Google Bot Disallows " + window.location.pathname)
+            }
+        }
+        else if (UA_groups["*"] !== undefined) {
+            text_output.log('inside * check');
+            if (UA_groups["*"].contains(window.location.pathname)) {
+                create_alert_box("* Disallows " + window.location.pathname)
+            }
+        }        
+    }
 
 
     /* this creates a super cool little alert box to tell you you are on a disallowed page at the bottom right of the screen */
-    this.create_alert_box = function(message){
+    var create_alert_box = function(message){
         ahhhh_no_robots = document.createElement('div')
         ahhhh_no_robots.id = "ahhhh_no_robots"
         ahhhh_no_robots.innerHTML = "<a href='#'>CLOSE</a><blink><h1>This page is <marquee>NO Index "+message+"</marquee></blink>"
@@ -118,29 +140,37 @@ function No_index_checker(){
                                              ahhhh_no_robots.remove();
                                          })
     }
+    
+    this.run_checker = function(){
+        var xmlhttp = new XMLHttpRequest();
+    
+        /* this will request the robots.txt file and then call the robots_alert function to test if the path is in there */
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                text_output = new Text_output()
+                //uncomment line below to output stufff to console
+                //text_output = console;
+                robots = xmlhttp.responseText;                                                     // the robots.txt text itself.
+                robots_parse(robots);                                                              // robots_parse takes the robots file and adds it to the UA_groups
+                text_output.log(UA_groups);
+                disallow_checker(UA_groups);
+                
+            }
+        }
+        if(!this.meta_tag_checker()){                                                               // checks if there is a no-follow meta tag if there is then id doesn't check robots.txt
+            xmlhttp.open("GET", this.url, true);                                                    // requests robots here
+            xmlhttp.send();                                                                         // sends the request.
+            
+        }
+    }
 }
 
 
 
 /* this function runs everything */
 if(!black_listed()){                                                                          // Checks if a function is on the ignore list
-    
-    NIC = new No_index_checker()                                                              // creates a new No_index_checker();
-    var xmlhttp = new XMLHttpRequest();
-    
-    /* this will request the robots.txt file and then call the robots_alert function to test if the path is in there */
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            text_output = new Text_output()
-            //uncomment line below to output stufff to console
-            text_output = console;
-            robots = xmlhttp.responseText;                                                     // the robots.txt text itself.
-            NIC.robots_alert(robots);                                                          // robots_alert checks the robots file
-        }
 
-    }
-    if(!NIC.meta_tag_checker()){                                                               // checks if there is a no-follow meta tag if there is then id doesn't check robots.txt
-        xmlhttp.open("GET", NIC.url, true);                                                    // requests robots here
-        xmlhttp.send();                                                                        // sends the request.
-    }
+    NIC = new No_index_checker()                                                              // creates a new No_index_checker();
+    NIC.run_checker();                                                                        // this is the main function
+    
 }
