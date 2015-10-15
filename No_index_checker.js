@@ -96,7 +96,7 @@ function No_index_checker(){
         for(var i = 0; i < meta_tags.length;i++){                                            // loops through all the meta tags
             if(meta_tag_regex.test(meta_tags[i].getAttribute('name'))){                      // if meta tag name is robots
                 if(no_regex.test(meta_tags[i].getAttribute('content'))){                     // if meta tag content is no-index or no-follow
-                    this.create_alert_box('meta tag');                                       // creates an alert box that has meta tag as the message.
+                    create_alert_box('meta tag');                                       // creates an alert box that has meta tag as the message.
                     return true;
                 }
             }
