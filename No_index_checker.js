@@ -63,7 +63,7 @@ function No_index_checker(){
     this.url = window.location.protocol + "//" + window.location.hostname + "/robots.txt";
     var UA_groups = new Object();
     var UA_regex = /user-agent\:\s*(.*)/i;                                                   // this catches the user-agent in a user-agent line
-    var disallow_regex= /disallow\: {0,2}([\w\\\/\.]*)/i;                                      // this catches the directory disallowed by the disallow statement
+    var disallow_regex= /disallow\: {0,2}([\w\\\/\.]*)/i;                                    // this catches the directory disallowed by the disallow statement
     var path_regex = new RegExp(window.location.pathname.substring(1,window.location.pathname.length));
     var meta_tag_regex = new RegExp('robots','gi');                                          // regex to find if robots is the name of the meta tag
     var no_regex = /no\-?(index|follow)/;                                                    // regex to find if no-index or no-follow is the content of the meta tag
@@ -80,10 +80,10 @@ function No_index_checker(){
         for(var i = 0; i < robots_array.length;i++){
             if(UA_regex.test(robots_array[i])){                                              // if the line is a user-agent: line
                 user_agent = robots_array[i].match(UA_regex)[1];                             // sets user_agent to the name from the robots.txt
-                UA_groups[user_agent] = new Array();                                    // creates a new array within a key value pair of the UA_groups object, where the key is the name of the UA
+                UA_groups[user_agent] = new Array();                                         // creates a new array within a key value pair of the UA_groups object, where the key is the name of the UA
                 }
             else if (disallow_regex.test(robots_array[i]) &&  user_agent !== undefined) {    // if the line is a disallow line and user_agent was already set 
-                UA_groups[user_agent].push(robots_array[i].match(disallow_regex)[1])    // add the path after disallow to the array
+                UA_groups[user_agent].push(robots_array[i].match(disallow_regex)[1])         // add the path after disallow to the array
             }
         }
         text_output.log(this.UA_groups);
@@ -134,7 +134,7 @@ function No_index_checker(){
         style_string    +=  "</style>"
         ahhhh_no_robots.innerHTML +=style_string
         document.body.appendChild(ahhhh_no_robots);
-        ahhhh_no_robots.addEventListener('click',                                             // adds a click listener that removes the box if you click on it
+        ahhhh_no_robots.addEventListener('click',                                                 // adds a click listener that removes the box if you click on it
                                          function(event){
                                              event.preventDefault();
                                              ahhhh_no_robots.remove();
@@ -168,9 +168,9 @@ function No_index_checker(){
 
 
 /* this function runs everything */
-if(!black_listed()){                                                                          // Checks if a function is on the ignore list
+if(!black_listed()){                                                                                // Checks if a function is on the ignore list
 
-    NIC = new No_index_checker()                                                              // creates a new No_index_checker();
-    NIC.run_checker();                                                                        // this is the main function
+    NIC = new No_index_checker()                                                                    // creates a new No_index_checker();
+    NIC.run_checker();                                                                              // this is the main function
     
 }
