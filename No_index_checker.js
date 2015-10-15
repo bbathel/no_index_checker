@@ -6,6 +6,7 @@
 // @author       The Brice
 // @match        *://*/*
 // @grant        unsafeWindow
+// @noframes      
 // ==/UserScript==
 
 // put hostnames to ignore here
@@ -86,7 +87,7 @@ function No_index_checker(){
                 UA_groups[user_agent].push(robots_array[i].match(disallow_regex)[1])         // add the path after disallow to the array
             }
         }
-        text_output.log(this.UA_groups);
+        
     }
     
     
@@ -105,15 +106,12 @@ function No_index_checker(){
     
     /* takes the UA_groups and decides if page is disallowed first for googlebot and if googlebot UA doesn't exist then it checks the "*" user-agent */
     var disallow_checker = function(UA_groups){
-        if (UA_groups['google-bot'] !== undefined) {
-            text_output.log(UA_groups['google-bot'].contains(window.location.pathname));
-            if (UA_groups['google-bot'].contains(window.location.pathname)) {
-                text_output.log('inside google-bot contains');
+        if (UA_groups['Googlebot'] !== undefined) {
+            if (UA_groups['Googlebot'].contains(window.location.pathname)) {
                 create_alert_box("Google Bot Disallows " + window.location.pathname)
             }
         }
         else if (UA_groups["*"] !== undefined) {
-            text_output.log('inside * check');
             if (UA_groups["*"].contains(window.location.pathname)) {
                 create_alert_box("* Disallows " + window.location.pathname)
             }
@@ -143,16 +141,17 @@ function No_index_checker(){
     
     this.run_checker = function(){
         var xmlhttp = new XMLHttpRequest();
+        text_output = this.url;
     
         /* this will request the robots.txt file and then call the robots_alert function to test if the path is in there */
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                 text_output = new Text_output()
                 //uncomment line below to output stufff to console
-                //text_output = console;
+                text_output = console;
                 robots = xmlhttp.responseText;                                                     // the robots.txt text itself.
+                text_output.log(robots)
                 robots_parse(robots);                                                              // robots_parse takes the robots file and adds it to the UA_groups
-                text_output.log(UA_groups);
                 disallow_checker(UA_groups);
                 
             }
