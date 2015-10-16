@@ -112,12 +112,12 @@ function No_index_checker(){
     var disallow_checker = function(UA_groups){
         if (UA_groups['Googlebot'] !== undefined) {
             if (UA_groups['Googlebot'].contains(window.location.pathname)) {
-                create_alert_box("Google Bot Disallows " + window.location.pathname)
+                create_alert_box("Robots Google Bot Disallows " + window.location.pathname)
             }
         }
         else if (UA_groups["*"] !== undefined) {
             if (UA_groups["*"].contains(window.location.pathname)) {
-                create_alert_box("* Disallows " + window.location.pathname)
+                create_alert_box("Robots <br> * Disallows " + window.location.pathname)
             }
         }        
     }
@@ -127,33 +127,44 @@ function No_index_checker(){
     var create_alert_box = function(message){
         ahhhh_no_robots = document.createElement('div')
         ahhhh_no_robots.id = "ahhhh_no_robots"
-        ahhhh_no_robots.innerHTML = "<a href='#'>CLOSE</a><blink><h1>This page is <marquee>NO Index "+message+"</marquee></blink>"
-        var style_string =  "<style>"
-        style_string    +=  "div#ahhhh_no_robots, div#ahhhh_no_robots h1, div#ahhhh_no_robots h1 marquee, div#ahhhh_no_robots a"
-        style_string    +=  "{color:red;text-shadow:5px 5px #000000;text-align:center;font-size:25px;font-weight:900;}"
-        style_string    +=  "div#ahhhh_no_robots{width:200px;height:200px;position:fixed;bottom:0;right:0;z-index:10000000;background-color:#2222ee;border:gold 10px outset;}"
-        style_string    +=  "div#ahhhh_no_robots a{color:orange}"
-        style_string    +=  "</style>"
-        ahhhh_no_robots.innerHTML +=style_string
+        ahhhh_no_robots.innerHTML = '<h1 id="exclamation-point">!</h1>';
+        ahhhh_no_robots.innerHTML += '<h2> this page is<br> no-index:<br>' + message + '</h2>';
+        var style_string = "<style>"
+        style_string += "#ahhhh_no_robots{height:200px;width:200px;position:fixed;bottom:0;right:0;text-transform:uppercase;z-index:100000000000;}"
+        style_string += "#ahhhh_no_robots h1#exclamation-point{color:red;font-size:100px;font-weight:900;text-align:center;margin-top:30%;}"
+        style_string += "#ahhhh_no_robots h2{text-transform:uppercase;color:red;font-size:25px;font-weight:900;text-align:center;height:0;position:relative;bottom:0;line-height:25px;overflow:hidden;}"
+        style_string += "</style>"
+        ahhhh_no_robots.innerHTML += style_string;
         document.body.appendChild(ahhhh_no_robots);
-        ahhhh_no_robots.addEventListener('click',                                                 // adds a click listener that removes the box if you click on it
+        ahhhh_no_robots.childNodes[0].addEventListener('click',                                                 // adds a click listener that popsup the information on the page.
                                          function(event){
                                              event.preventDefault();
-                                             ahhhh_no_robots.remove();
+                                             ahhhh_no_robots.childNodes[1].style.height = '200px';
+                                             ahhhh_no_robots.childNodes[0].remove();
+                                             ahhhh_no_robots.style.backgroundColor = "rgba(200,200,200,.8)";
+                                             
+                                             
                                          })
+        ahhhh_no_robots.childNodes[1].addEventListener('click',                                                 // adds a click listener that removes the box if you click on it
+                                        function(event){
+                                            event.preventDefault();
+                                            ahhhh_no_robots.remove();
+                                            
+                                        })
+        
     }
     
     /* This runs the whole check in one function call once a new instance of No_index_checker is created. */
     this.run_checker = function(){
+        text_output = new Text_output()                                                    // creates a bs test_output object to so no error is thrown for all the .log()'s that I have for debugging.
+        //uncomment line below to output stuff to console
+        //text_output = console;
         var xmlhttp = new XMLHttpRequest();
-        text_output = this.url;
+        text_output.log(this.url);
     
         /* this will request the robots.txt file and then call the robots_alert function to test if the path is in there */
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                text_output = new Text_output()                                                    // creates a bs test_output object to so no error is thrown for all the .log()'s that I have for debugging.
-                //uncomment line below to output stuff to console
-                //text_output = console;
                 robots = xmlhttp.responseText;                                                     // the robots.txt text itself.
                 text_output.log(robots)
                 robots_parse(robots);                                                              // robots_parse takes the robots file and adds it to the UA_groups
