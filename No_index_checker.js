@@ -64,7 +64,7 @@ function No_index_checker(){
     this.url = window.location.protocol + "//" + window.location.hostname + "/robots.txt";
     var UA_groups = new Object();
     var UA_regex = /user-agent\:\s*(.*)/i;                                                   // this catches the user-agent in a user-agent line
-    var disallow_regex= /disallow\: {0,2}([\w\\\/\.]*)/i;                                    // this catches the directory disallowed by the disallow statement
+    var disallow_regex= /disallow\: {0,2}([\w\\\/\.\*\?]*)/i;                                // this catches the directory disallowed by the disallow statement
     var path_regex = new RegExp(window.location.pathname.substring(1,window.location.pathname.length));
     var meta_tag_regex = new RegExp('robots','gi');                                          // regex to find if robots is the name of the meta tag
     var no_regex = /no\-?(index|follow)/;                                                    // regex to find if no-index or no-follow is the content of the meta tag
@@ -97,7 +97,7 @@ function No_index_checker(){
         for(var i = 0; i < meta_tags.length;i++){                                            // loops through all the meta tags
             if(meta_tag_regex.test(meta_tags[i].getAttribute('name'))){                      // if meta tag name is robots
                 if(no_regex.test(meta_tags[i].getAttribute('content'))){                     // if meta tag content is no-index or no-follow
-                    create_alert_box('meta tag');                                       // creates an alert box that has meta tag as the message.
+                    create_alert_box('meta tag');                                            // creates an alert box that has meta tag as the message.
                     return true;
                 }
             }
