@@ -21,13 +21,15 @@ Array.prototype.contains = function(obj) {
     }
     return false;
 }
+
+/* bs text_output object */
 var Text_output = function(){
         this.log = function(){ return true;};
     }
     
 var text_output,NIC;
 
-
+/* array of pages to ignore */
 var ignore_list = [
         'crm.searchinfluence.com',
         'mail.google.com',
@@ -54,14 +56,16 @@ var ignore_list = [
         'googleads.g.doubleclick.net',
         '18.client-channel.google.com'
     ];
+
+/* returns true if the current page is on the ignore list */
 var black_listed = function(){
         return ignore_list.contains(window.location.host);
     }
     
 function No_index_checker(){
  
-    var robots, disallow_string, ahhhh_no_robots, meta_tags;                                 //variables to be used later.
-    this.url = window.location.protocol + "//" + window.location.hostname + "/robots.txt";
+    var robots, disallow_string, ahhhh_no_robots, meta_tags;                                 // variables to be used later.
+    this.url = window.location.protocol + "//" + window.location.hostname + "/robots.txt";   // url of the robots.txt file composed of the protocol two slashes the hostname and "robots.txt"
     var UA_groups = new Object();
     var UA_regex = /user-agent\:\s*(.*)/i;                                                   // this catches the user-agent in a user-agent line
     var disallow_regex= /disallow\: {0,2}([\w\\\/\.\*\?]*)/i;                                // this catches the directory disallowed by the disallow statement
@@ -98,7 +102,7 @@ function No_index_checker(){
             if(meta_tag_regex.test(meta_tags[i].getAttribute('name'))){                      // if meta tag name is robots
                 if(no_regex.test(meta_tags[i].getAttribute('content'))){                     // if meta tag content is no-index or no-follow
                     create_alert_box('meta tag');                                            // creates an alert box that has meta tag as the message.
-                    return true;
+                    return true;                                                             // returns true if there is a meta tag so this can be used as a boolean later on in the run_checker function
                 }
             }
         } return false;
@@ -139,6 +143,7 @@ function No_index_checker(){
                                          })
     }
     
+    /* This runs the whole check in one function call once a new instance of No_index_checker is created. */
     this.run_checker = function(){
         var xmlhttp = new XMLHttpRequest();
         text_output = this.url;
@@ -146,13 +151,13 @@ function No_index_checker(){
         /* this will request the robots.txt file and then call the robots_alert function to test if the path is in there */
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                text_output = new Text_output()
-                //uncomment line below to output stufff to console
-                text_output = console;
+                text_output = new Text_output()                                                    // creates a bs test_output object to so no error is thrown for all the .log()'s that I have for debugging.
+                //uncomment line below to output stuff to console
+                //text_output = console;
                 robots = xmlhttp.responseText;                                                     // the robots.txt text itself.
                 text_output.log(robots)
                 robots_parse(robots);                                                              // robots_parse takes the robots file and adds it to the UA_groups
-                disallow_checker(UA_groups);
+                disallow_checker(UA_groups);                                                       // parses the ua groups to see if page is disallowed. 
                 
             }
         }
@@ -167,7 +172,7 @@ function No_index_checker(){
 
 
 /* this function runs everything */
-if(!black_listed()){                                                                                // Checks if a function is on the ignore list
+if(!black_listed()){                                                                                // Checks if a page is on the ignore list
 
     NIC = new No_index_checker()                                                                    // creates a new No_index_checker();
     NIC.run_checker();                                                                              // this is the main function
