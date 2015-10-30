@@ -114,10 +114,16 @@ function No_index_checker(){
             if (UA_groups['Googlebot'].contains(window.location.pathname)) {
                 create_alert_box("Robots Google Bot Disallows " + window.location.pathname)
             }
+            else if (UA_groups["Googlebot"].contains('/')) {
+                create_alert_box("Robots <br> * Disallows /" )                                                 // if this page isn't explicitly listed in Robots.txt but googlebot user agent blocks all an alert box pops up
+            }
         }
         else if (UA_groups["*"] !== undefined) {
             if (UA_groups["*"].contains(window.location.pathname)) {
                 create_alert_box("Robots <br> * Disallows " + window.location.pathname)
+            }
+            else if (UA_groups["*"].contains('/')) {
+                create_alert_box("Robots <br> * Disallows /" )                                                  // if this page isn't explicitly listed in Robots.txt but * user agent blocks all an alert box pops up
             }
         }        
     }
