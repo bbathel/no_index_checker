@@ -68,7 +68,7 @@ function No_index_checker(){
     this.url = window.location.protocol + "//" + window.location.hostname + "/robots.txt";   // url of the robots.txt file composed of the protocol two slashes the hostname and "robots.txt"
     var UA_groups = new Object();
     var UA_regex = /user-agent\:\s*(.*)/i;                                                   // this catches the user-agent in a user-agent line
-    var disallow_regex= /disallow\: {0,2}([\w\\\/\.\*\?]*)/i;                                // this catches the directory disallowed by the disallow statement
+    var disallow_regex= /disallow\: {0,2}([\w\\\/\.\*\?\-]*)/i;                                // this catches the directory disallowed by the disallow statement
     var path_regex = new RegExp(window.location.pathname.substring(1,window.location.pathname.length));
     var meta_tag_regex = new RegExp('robots','gi');                                          // regex to find if robots is the name of the meta tag
     var no_regex = /no\-?(index|follow)/;                                                    // regex to find if no-index or no-follow is the content of the meta tag
@@ -108,26 +108,37 @@ function No_index_checker(){
         } return false;
     }
     
+    
+    
+    /**/
+    var ua_disallow = function(user_agent){
+        if (UA_groups[user_agent] !== undefined) {
+            if (UA_groups[user_agent].contains(window.location.pathname)) {
+                create_alert_box("Robots "+ user_agent + " Disallows " + window.location.pathname)
+                return true;
+            }
+            else if (UA_groups[user_agent].contains('/')) {
+                create_alert_box("Robots "+ user_agent + " Disallows /" )                                                 // if this page isn't explicitly listed in Robots.txt but googlebot user agent blocks all an alert box pops up
+                return true;
+            }
+            
+        }
+        
+        
+    }
+    
     /* takes the UA_groups and decides if page is disallowed first for googlebot and if googlebot UA doesn't exist then it checks the "*" user-agent */
     var disallow_checker = function(UA_groups){
-        if (UA_groups['Googlebot'] !== undefined) {
-            if (UA_groups['Googlebot'].contains(window.location.pathname)) {
-                create_alert_box("Robots Google Bot Disallows " + window.location.pathname)
-            }
-            else if (UA_groups["Googlebot"].contains('/')) {
-                create_alert_box("Robots <br> * Disallows /" )                                                 // if this page isn't explicitly listed in Robots.txt but googlebot user agent blocks all an alert box pops up
+        var important_UAs = ['googlebot','*']
+        for(var i = 0; i < important_UAs.length ; i++ ){
+            if(ua_disallow(important_UAs[i])){
+                return true;
             }
         }
-        else if (UA_groups["*"] !== undefined) {
-            if (UA_groups["*"].contains(window.location.pathname)) {
-                create_alert_box("Robots <br> * Disallows " + window.location.pathname)
-            }
-            else if (UA_groups["*"].contains('/')) {
-                create_alert_box("Robots <br> * Disallows /" )                                                  // if this page isn't explicitly listed in Robots.txt but * user agent blocks all an alert box pops up
-            }
-        }        
+        return false;
     }
-
+    
+    
 
     /* this creates a super cool little alert box to tell you you are on a disallowed page at the bottom right of the screen */
     var create_alert_box = function(message){
