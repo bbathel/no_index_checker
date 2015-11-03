@@ -68,11 +68,11 @@ function No_index_checker(){
     this.url = window.location.protocol + "//" + window.location.hostname + "/robots.txt";   // url of the robots.txt file composed of the protocol two slashes the hostname and "robots.txt"
     var UA_groups = new Object();
     var UA_regex = /user-agent\:\s*(.*)/i;                                                   // this catches the user-agent in a user-agent line
-    var disallow_regex= /disallow\: {0,2}([\w\\\/\.\*\?\-]*)/i;                                // this catches the directory disallowed by the disallow statement
+    var disallow_regex= /disallow\: {0,2}([\w\\\/\.\*\?\-]*)/i;                              // this catches the directory disallowed by the disallow statement
     var path_regex = new RegExp(window.location.pathname.substring(1,window.location.pathname.length));
     var meta_tag_regex = new RegExp('robots','gi');                                          // regex to find if robots is the name of the meta tag
     var no_regex = /no\-?(index|follow)/;                                                    // regex to find if no-index or no-follow is the content of the meta tag
-    
+    var important_UAs = ['googlebot','*']                                                    // an array of User-agents we care about starting from most specfic ending in least specific (usually *)
     
     /* getters */
     this.get_uas = function(){return UA_groups};
@@ -110,26 +110,22 @@ function No_index_checker(){
     
     
     
-    /**/
+    /* this function takes an array of user-agents defined at the top of this class and looks through them for disallow statements*/
     var ua_disallow = function(user_agent){
         if (UA_groups[user_agent] !== undefined) {
             if (UA_groups[user_agent].contains(window.location.pathname)) {
-                create_alert_box("Robots "+ user_agent + " Disallows " + window.location.pathname)
+                create_alert_box("Robots "+ user_agent + " Disallows " + window.location.pathname)                        // if this page is explicitly listed in Robots.txt 
                 return true;
             }
             else if (UA_groups[user_agent].contains('/')) {
-                create_alert_box("Robots "+ user_agent + " Disallows /" )                                                 // if this page isn't explicitly listed in Robots.txt but googlebot user agent blocks all an alert box pops up
+                create_alert_box("Robots "+ user_agent + " Disallows /" )                                                 // if this page isn't explicitly listed in Robots.txt but user-agent disallows / an alert box pops up
                 return true;
             }
-            
         }
-        
-        
     }
     
     /* takes the UA_groups and decides if page is disallowed first for googlebot and if googlebot UA doesn't exist then it checks the "*" user-agent */
     var disallow_checker = function(UA_groups){
-        var important_UAs = ['googlebot','*']
         for(var i = 0; i < important_UAs.length ; i++ ){
             if(ua_disallow(important_UAs[i])){
                 return true;
@@ -138,8 +134,6 @@ function No_index_checker(){
         return false;
     }
     
-    
-
     /* this creates a super cool little alert box to tell you you are on a disallowed page at the bottom right of the screen */
     var create_alert_box = function(message){
         ahhhh_no_robots = document.createElement('div')
@@ -159,16 +153,12 @@ function No_index_checker(){
                                              ahhhh_no_robots.childNodes[1].style.height = '200px';
                                              ahhhh_no_robots.childNodes[0].remove();
                                              ahhhh_no_robots.style.backgroundColor = "rgba(200,200,200,.8)";
-                                             
-                                             
                                          })
         ahhhh_no_robots.childNodes[1].addEventListener('click',                                                 // adds a click listener that removes the box if you click on it
                                         function(event){
                                             event.preventDefault();
-                                            ahhhh_no_robots.remove();
-                                            
+                                            ahhhh_no_robots.remove();  
                                         })
-        
     }
     
     /* This runs the whole check in one function call once a new instance of No_index_checker is created. */
@@ -186,7 +176,6 @@ function No_index_checker(){
                 text_output.log(robots)
                 robots_parse(robots);                                                              // robots_parse takes the robots file and adds it to the UA_groups
                 disallow_checker(UA_groups);                                                       // parses the ua groups to see if page is disallowed. 
-                
             }
         }
         if(!this.meta_tag_checker()){                                                               // checks if there is a no-follow meta tag if there is then id doesn't check robots.txt
@@ -196,8 +185,6 @@ function No_index_checker(){
         }
     }
 }
-
-
 
 /* this function runs everything */
 if(!black_listed()){                                                                                // Checks if a page is on the ignore list
